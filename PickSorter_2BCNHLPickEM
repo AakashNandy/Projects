@@ -1,0 +1,52 @@
+function indexOfIds(userId)
+{
+  var n = userId.indexOf("#");
+  var userName = userId
+  if(n != -1)
+    userName = userId.substring(0, n)
+    
+    userName = userName.toUpperCase();
+  return userName 
+}
+
+
+function Game1() 
+{
+  var app = SpreadsheetApp;
+  var activeSheet = app.getActiveSpreadsheet().getActiveSheet();
+  
+  //set up variables
+  var awayTeam = activeSheet.getRange(2,24).getValue();
+  var homeTeam = activeSheet.getRange(2,25).getValue();
+  var choiceRow = 3;
+  var lastRowP = activeSheet.getRange(1,15).getValue();
+  var team1Choices = activeSheet.getRange(2,15).getValue();
+  var team2Choices = activeSheet.getRange(3,15).getValue();
+
+  var list1Choices = [];
+  for (var i = 3; i< team1Choices+3; i++)
+  {
+      var UserId = activeSheet.getRange(i,24).getValue();
+      var name = indexOfIds(UserId)
+      list1Choices.push(name)      
+  }
+  
+  var list2Choices = [];
+  for (var i = 3; i< team2Choices+3; i++)
+  {
+      var UserId = activeSheet.getRange(i,25).getValue();
+      var name = indexOfIds(UserId)
+      list2Choices.push(name)      
+  }
+  
+  for(var row = 5; row <= lastRowP+4; row++)
+  { 
+     var nameCol = activeSheet.getRange(row, 1).getValue().toUpperCase();  
+     if (list1Choices.indexOf(nameCol) > -1)
+       activeSheet.getRange(row, 2).setValue(awayTeam);
+     else if (list2Choices.indexOf(nameCol) > -1)
+       activeSheet.getRange(row, 2).setValue(homeTeam);
+     else
+       activeSheet.getRange(row, 2).setValue("--");     
+  } 
+}
