@@ -1,0 +1,95 @@
+# Program that counts consecutive 1’s.
+.global _start
+.global main
+.text
+
+_start:
+	jal main   #jump to main but save in ra so can jump back
+
+#________________________main_____________________#
+
+main: 
+	la a1, LIST # Load the memory address into s2
+	addi s0, zero, 0 # Register s0 will hold the result (longest string of 1s)
+	addi s1, zero, -1 #For terminating
+	
+	
+MAIN_LOOP:	
+	lw a0, 0(a1) # Holds the first value in the list
+	beq a0, s1, MAIN_END #Check if a0 is -1
+	jal ONES #use jal because need to return to this adress after ONES runs
+	ble s0, a0, UPDATE #if a0 > s0, update s0 to a0
+	j SKIP
+
+
+SKIP:
+	addi a1, a1, 4 #Add 4 bits to the adress = next word in the list
+	j MAIN_LOOP
+	
+	
+UPDATE:
+	mv s0, a0
+	j SKIP
+
+
+MAIN_END:
+	mv a0, s0 #make sure final result is in a0 when it's returned
+	j END 
+	
+	
+END: 
+	j END
+
+#__________________Sub-routine stuff______________________________#
+ONES:
+	addi t0, zero, 0; #counter
+	mv t2, a0 
+	addi t1, zero, 0
+	j ONES_LOOP
+
+
+ONES_LOOP:
+	beqz t2, ONES_END # Loop until data contains no more 1’s
+	andi t3, t2, 1
+	beqz t3, RESET
+	addi t1, t1, 1
+	srli t2, t2, 1 # Perform SHIFT (by 1 position), followed by AND
+	j ONES_LOOP # Would do this until the data contains no more 1s
+
+RESET:
+	bge t1, t0, OVERWRITE
+	addi t1, zero, 0
+	srli t2, t2, 1
+	j ONES_LOOP
+
+OVERWRITE:
+	mv t0, t1
+	addi t1, zero, 0
+	srli t2, t2, 1
+	j ONES_LOOP
+	
+ONES_END:
+	mv a0, t0 #move result back to t0 from a0 after it was eddited it in ONES_LOOP
+	jr ra #return to caller
+	
+
+#___________________Data stuff___________________________________#
+.global LIST
+.data
+LIST:
+.word 0x103fe00f
+.word 0x1A2BC00E
+.word 0xF03DE10C
+.word 0x223FE20F
+.word 0xBC0FA30B
+.word 0x110FE00D
+.word 0x3F2AE00F
+.word 0x4D1CE10A
+.word 0x7E2BE20E
+.word 0xF12AE00C
+.word 0x2C3DF10F
+
+.word -1
+
+	
+	
